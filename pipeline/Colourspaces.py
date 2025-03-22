@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-def yCbCrProcessing(image, CbMinusCrThresh = 80):
+def YCbCrProcessing(image, CbMinusCrThresh = 80):
     """
     Uses methodologies from "Fire Recognition Using Rgb And YCbCr Color Space"
     to detect potential fire pixels in YCbCr colour space. 
@@ -28,6 +28,20 @@ def yCbCrProcessing(image, CbMinusCrThresh = 80):
     return finalMask
 
 
-    
+def RGBProcessing(image):
+    """
+    Uses methodologies from "Fire Recognition Using Rgb And YCbCr Color Space"
+    to detect potential fire pixels in RGB colour space. 
+    Returns a mask with the same size as the image.
+    """
+    B, G, R = cv2.split(image)
 
+    RgtGgtB = np.logical_and(R > G, G > B)
+
+    meanCalcs = np.logical_and.reduce([R >= np.mean(R), G >= np.mean(G), B <= np.mean(B)])
+
+    finalMask = np.logical_and(RgtGgtB, meanCalcs)
+    finalMask.dtype="uint8"
+    
+    return finalMask
 
