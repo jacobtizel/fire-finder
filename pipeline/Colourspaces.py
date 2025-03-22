@@ -38,6 +38,7 @@ def RGBProcessing(image):
 
     RgtGgtB = np.logical_and(R > G, G > B)
 
+
     meanCalcs = np.logical_and.reduce([R >= np.mean(R), G >= np.mean(G), B <= np.mean(B)])
 
     finalMask = np.logical_and(RgtGgtB, meanCalcs)
@@ -61,6 +62,28 @@ and Background Modeling" to detect potential fire pixels in CIE L*A*B* colour sp
     BgtA = B > A
 
     finalMask = np.logical_and(meanCalcs, BgtA)
+    finalMask.dtype="uint8"
+    
+    return finalMask
+
+def HSVProcessing(image):
+    """
+    Uses methodologies from "Implementation of Fire Image Processing for Land Fire Detection Using
+    Color Filtering Method" to detect fire pixels in HSV colour space.
+    Returns a mask with the same size as the image.
+    """
+
+    HSV = cv2.cvtColor(image, cv2.COLOR_BGR2HSV_FULL)
+
+    H, S, V = cv2.split(HSV)
+
+    H_test = np.logical_and(H >=0, H <= 20)
+
+    S_test = np.logical_and(S >=74, S <= 166)
+
+    V_test = np.logical_and(V >= 200, V <= 230)
+
+    finalMask = np.logical_and.reduce([H_test, S_test, V_test])
     finalMask.dtype="uint8"
     
     return finalMask
