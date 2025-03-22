@@ -11,8 +11,8 @@ def YCbCrProcessing(image, CbMinusCrThresh = 80):
 
     Y, Cr, Cb = cv2.split(YCrCb)
 
-    YGreaterThanCb = Y >= Cb
-    CrGreaterThanCb = Cr >= Cb
+    YgtCb = Y >= Cb
+    CrgtCb = Cr >= Cb
 
     # meanCalcs = np.logical_and(np.logical_and(Y >= np.mean(Y), Cb <= np.mean(Cb)), Cr >= np.mean(Cr))
     meanCalcs = np.logical_and.reduce([Y >= np.mean(Y), Cb <= np.mean(Cb), Cr >= np.mean(Cr)])
@@ -22,7 +22,7 @@ def YCbCrProcessing(image, CbMinusCrThresh = 80):
 
     chrominanceThresh = np.logical_and(Cb <= 120, Cr >= 150)
 
-    finalMask = np.logical_and.reduce([YGreaterThanCb, CrGreaterThanCb, meanCalcs, CbMinusCr, chrominanceThresh])
+    finalMask = np.logical_and.reduce([YgtCb, CrgtCb, meanCalcs, CbMinusCr, chrominanceThresh])
     finalMask.dtype="uint8"
     
     return finalMask
@@ -45,3 +45,22 @@ def RGBProcessing(image):
     
     return finalMask
 
+def LABProcessing(image):
+    """
+    Uses methodologies from "Fire Detection Using Multi Color Space
+and Background Modeling" to detect potential fire pixels in CIE L*A*B* colour space.
+    Returns a mask with the same size as the image.
+    """
+
+    LAB = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
+
+    L, A, B = cv2.split(LAB)
+
+    meanCalcs = np.logical_and.reduce([L >= np.mean(L), A <= np.mean(A), B >= np.mean(B)])
+
+    BgtA = B > A
+
+    finalMask = np.logical_and(meanCalcs, BgtA)
+    finalMask.dtype="uint8"
+    
+    return finalMask
