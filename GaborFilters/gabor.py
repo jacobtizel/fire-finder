@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2 as cv
+import time
 from scipy import ndimage as ndi
 
 from skimage import data
@@ -11,10 +12,17 @@ from skimage.transform import resize
 from sklearn.cluster import KMeans
 
 
-def createGaborFilter(image):
-    
+def createGaborFilter(image, shrinkImage: bool):
+    startTime = time.time()
     image = img_as_float(image)
-    image = color.rgb2gray(image)
+    imageBW = color.rgb2gray(image)
+    
+    #Shrinking the image takes execution from 4.25 -> 0.67 Seconds. Definitely consider using if resolution isn't hugely important
+    if shrinkImage:
+        shrink = (slice(0, None, 3), slice(0, None, 3))
+        imageBW = imageBW[shrink]
+    
+    
     #0, 45, 90, 135.
     theta1 = [0, np.pi/4, np.pi/2, 3*np.pi/4]# Choose a variety of theta values for good filter kernals
     
@@ -23,35 +31,17 @@ def createGaborFilter(image):
     kernels = createFilterKernels(theta1, sigma, frequency)
     
     gaborFeatures = [] # This will store image features. This can be used for classification
-    kernel_params = []
+
     for kernel in kernels:
-        response = gaborPower(image, kernel)
+        response = gaborPower(imageBW, kernel)
         gaborFeatures.append(response.flatten())
         
     gaborFeatures = np.array(gaborFeatures).T #Reshape to (pixels, feature(s))
     #With features this might be complete.
     #Add segmentation for testing? Maybe this stays?
-    segmentedImage = applySegmentation(gaborFeatures,image)
+    segmentedImage = applySegmentation(gaborFeatures,imageBW)
     
-    showSegmentedImage(image,segmentedImage)
-
-def compute_feats(image, kernels):
-    feats = np.zeros((len(kernels), 2), dtype=np.double)
-    for k, kernel in enumerate(kernels):
-        filtered = ndi.convolve(image, kernel, mode='wrap')
-        feats[k, 0] = filtered.mean()
-        feats[k, 1] = filtered.var()
-    return feats
-
-def match(feats, ref_feats):
-    min_error = np.inf
-    min_i = None
-    for i in range(ref_feats.shape[0]):
-        error = np.sum((feats - ref_feats[i, :]) ** 2)
-        if error < min_error:
-            min_error = error
-            min_i = i
-    return min_i
+    showSegmentedImage(image,segmentedImage,startTime)
 
 def createFilterKernels(thetaVals: list, sigmaVals:list, frequencyVals:list):
 # prepare filter bank kernels
@@ -74,29 +64,38 @@ def gaborPower(image, kernel):
     )
 
 def applySegmentation(featureMtx, image):
-    
-    clusters = 3
-    #Create Kmeans clustering object.
-    kmeans = KMeans(n_clusters= clusters, random_state=42, n_init=10)
+    clusters = 2
+    #Create Kmeans clustering object. Seed to a state for deterministic behaviour
+    kmeans = KMeans(n_clusters= clusters, random_state=42, n_init='auto')
     kmeans.fit(featureMtx) # Fit features into clusters
-    
     segmentedImage = kmeans.labels_.reshape(image.shape)
     return segmentedImage
-def showSegmentedImage(image, segmentedImage):
+
+def showSegmentedImage(image, segmentedImage, startTime: int) -> None: 
+    
     fig, axes = plt.subplots(1, 2, figsize=(8, 4))
     axes[0].imshow(image, cmap='gray')
     axes[0].set_title('Original Fire Image')
     axes[0].axis('off')
 
     # Plot segmented image with different regions
-    axes[1].imshow(segmentedImage, cmap='nipy_spectral')
+    axes[1].imshow(segmentedImage, cmap='viridis')
     axes[1].set_title('Segmented Fire Image')
     axes[1].axis('off')
+    
+    endTime = time.time()
+    print(f"Execution took: {endTime-startTime:.2f} Seconds ")
     plt.tight_layout()
     plt.show()
 
+
+
 #This is for testing the Gabor Filter Independently
 fireImageLocation = 'BoWFireDataset/dataset/img/fire/fire027.png'
-fire = cv.imread(fireImageLocation)
+fire = cv.imread(fireImageLocation) #BGR and not RGB?????
+fire = cv.cvtColor(fire, cv.COLOR_BGR2RGB)
+#Maybe increasing contrast and brightness will help?
 
-createGaborFilter(fire)
+#fire = fire[shrink]
+createGaborFilter(fire, False)
+
