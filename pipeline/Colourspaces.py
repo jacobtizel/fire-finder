@@ -5,6 +5,7 @@ def YCbCrProcessing(image, CbMinusCrThresh = 80):
     """
     Uses methodologies from "Fire Recognition Using Rgb And YCbCr Color Space"
     to detect potential fire pixels in YCbCr colour space. 
+    CbMinu
     Returns a mask with the same size as the image.
     """
     YCrCb = cv2.cvtColor(image, cv2.COLOR_BGR2YCR_CB)
