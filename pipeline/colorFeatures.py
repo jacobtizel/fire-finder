@@ -3,7 +3,7 @@ import cv2
 
 def extract_color_features(imageRGB):
     """
-    Given R
+    Given RGB image
     Extracts pixel-level top 6 color features: H, R, S, V, Cr, a (by PCA analysis)
     Returns (pixels, 6) feature matrix.
     """
