@@ -4,9 +4,9 @@ import numpy as np
 from sklearn.metrics import confusion_matrix, jaccard_score, accuracy_score, precision_score, recall_score, f1_score
 
 # --- Configuration ---
-GROUND_TRUTH_MASK_DIR = 'BoWFireDataset/dataset/mask/fire'  # Path to your ground truth masks
-PREDICTED_MASK_DIR = 'results/predicted_masks'  # Path to the directory where you save predicted masks
-# Or if you saved segmented images:
+GROUND_TRUTH_MASK_DIR = 'BoWFireDataset/dataset/gt'  # Path to ground truth masks
+PREDICTED_MASK_DIR = 'results/predicted_masks'  # Path to predicted masks
+# Or if using segmented images:
 # ORIGINAL_IMAGE_DIR = 'BoWFireDataset/dataset/img/fire'
 # RESULTS_DIR = 'results/segmented_images'
 
