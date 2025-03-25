@@ -11,19 +11,21 @@ from skimage.util import img_as_float
 from skimage.filters import gabor_kernel, gabor, gaussian
 from skimage.transform import resize
 from sklearn.cluster import KMeans
-from pywt import dwt2
+#from pywt import dwt2
 
 
 
-def createGaborFilter(image, shrinkImage: bool):
-    """ Creates a Gabor Filter based on an input image
-
+def createGaborFilter(image, shrinkImage: bool) -> np.array:
+    """ 
+    Creates Gabor Features based on an Input Image.\n
+    Uses Gabor Filter kernels (7x7), 1 for every combination of theta, frequency and sigma.
+        
     Args:
         image (cv.image): Input image
         shrinkImage (bool): Should the image be shrunk?
-
+        
     Returns:
-        _type_:     
+        np.array: (x, y, n) Where x and y are image dimensions and n is the amount of Gabor Features
     """    
     
     startTime = time.time()
@@ -51,6 +53,10 @@ def createGaborFilter(image, shrinkImage: bool):
         #gaborFeatures.append(response.flatten())
         
     gaborFeatures = np.array(gaborFeatures).T #Reshape to (pixels, feature(s))
+    gaborFeatures = np.transpose(gaborFeatures, axes = (1,0,2))
+    #gaborFeatures = np.swapaxes(image,1,0)
+    stopTime = time.time()
+    print(f'Creating Gabor Features took {stopTime-startTime:.2f} Seconds.\n')
     #With features this might be complete.
     #Add segmentation for testing? Maybe this stays?
     # segmentedImage = applySegmentation(gaborFeatures,imageBW)
@@ -85,7 +91,7 @@ def createFilterKernels(thetaVals: list, sigmaVals:list, frequencyVals:list) -> 
 
 
 def gaborMagnitudeResponse(image, kernel:list):
-    """Finds real and imaginary components from filter kernwl applied to image then finds magnitude, 
+    """Finds real and imaginary components from filter kernel applied to image then finds magnitude, 
     ||E|| = √(Re(E)^2 + Im(E)^2)
         
     Args:
