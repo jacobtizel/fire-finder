@@ -1,6 +1,19 @@
 import os
 import cv2 as cv
 from dcp_dehaze import dcp_dehaze
+import cv2
+
+
+####---Ladan Preprocessing functions
+def resize_image(img, size=(256, 256)):
+    return cv2.resize(img, size)
+
+## gaussian or bilateral? very similar bilateral preserve edges
+def apply_gaussian_blur(img, kernel_size=(3, 3), sigma=0.5):
+    return cv2.GaussianBlur(img, kernel_size, sigma)
+
+def apply_bilateral_filter(img, d=9, sigma_color=75, sigma_space=75):
+    return cv2.bilateralFilter(img, d, sigma_color, sigma_space)
 
 def resize(img, max_size: int):
     """
