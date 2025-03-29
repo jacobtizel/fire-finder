@@ -146,6 +146,75 @@ def showSegmentedImage(image, segmentedImage, startTime: int) -> None:
     plt.tight_layout()
     plt.show()
 
+
+
+###------ Ladan's code for gabor features:
+#first two functions, uses gray scale and set a kernel size of 7 with different parameters
+
+def get_gabor_kernels(ksize=7, sigma=2.0):
+    """Generate a bank of Gabor kernels at different orientations and wavelengths"""
+    kernels = []
+    for theta in [0, np.pi/4, np.pi/2, 3*np.pi/4]:
+        for lambd in [4, 8]:
+            kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, lambd, gamma=0.5, psi=0)
+            kernels.append(kernel)
+    return kernels
+
+
+def apply_gabor_filters(gray_img, kernels):
+    """Apply a list of Gabor kernels to a grayscale image, return a list of responses"""
+    responses = []
+    for kernel in kernels:
+        filtered = cv2.filter2D(gray_img, cv2.CV_32F, kernel)
+        responses.append(filtered)
+    return responses  # List of arrays, shape (H, W) each
+
+## these two functions written to test different kernel sizes and get gabor features for a specific color channels (not grayscale)
+def get_diverse_gabor_kernels():
+    """Generate a diverse Gabor kernel bank with multiple sizes, wavelengths, orientations, and aspect ratios."""
+    kernels = []
+    theta_list = np.linspace(0, np.pi, num=4, endpoint=False)
+    ksize_list = [11]
+    lambd_list = [4, 8]
+    gamma_list = [1.0]
+    sigma = 1
+    psi = 0
+
+    for ksize in ksize_list:
+        for theta in theta_list:
+            for lambd in lambd_list:
+                for gamma in gamma_list:
+                    kernel = cv2.getGaborKernel((ksize, ksize), sigma, theta, lambd, gamma, psi, ktype=cv2.CV_32F)
+                    kernels.append(kernel)
+    return kernels
+
+
+
+def apply_gabor_to_selected_channels(img_dict, selected_channels, kernels):
+    """
+    Apply Gabor filters to selected color channels of an image.
+
+    Args:
+        img_dict (dict): Dictionary of image channels, e.g., {'Cb': ..., 'b': ..., 'V': ...}
+        selected_channels (list): List of channel names to apply Gabor to
+        kernels (list): List of Gabor kernels
+
+    Returns:
+        np.ndarray: Flattened vector of all Gabor responses from selected channels
+    """
+    gabor_feats = []
+
+    for ch in selected_channels:
+        gray_img = img_dict[ch]
+        for kernel in kernels:
+            filtered = cv2.filter2D(gray_img, cv2.CV_32F, kernel)
+            gabor_feats.append(filtered.flatten())  # or filtered.mean() for patch-level summary
+
+    return np.concatenate(gabor_feats)
+
+
+
+###----------------------------------
 #These next lines represent a Matlab like implementation of the Gabor Filter
 #This method is very slow, and does not give good results. More work
 #could be done to increase the performance of these methods,
