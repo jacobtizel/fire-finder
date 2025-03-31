@@ -11,7 +11,7 @@ import joblib
 ## the following step to test an image on a pre-tained model
 
 #1. Read 
-image_bgr = cv2.imread("image_path")
+image_bgr = cv2.imread("BoWFireDataset/dataset/img/fire/fire007.png")
 img= cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB) # this step is critical cuz the filters assume input is in RGB not BGR(default)
 #2 resize and bilateral filter (preprocessing step)
 img_resized = resize_image(img=img)
@@ -28,10 +28,10 @@ combined_feats = np.hstack((color_feats, gabor_features))  # (n_pixels, 8)
 
 #4 need to scale the input: I should have passed the same scaler I used
 #  for training or now!! I add this later
-scaler = joblib.load("scaler.pkl")
+scaler = joblib.load("tuned_models/scaler.pkl")
 features_scaled = scaler.transform(combined_feats)
 #5. Load the saved model and predict
-model = joblib.load('tuned_model/best_logistic_model.pkl')
+model = joblib.load('tuned_models/best_logistic_model.pkl')
 y_pred = model.predict(features_scaled) #1D array of pixels
 
 #6 reshape from array to 2D
