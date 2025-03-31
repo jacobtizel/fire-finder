@@ -57,7 +57,7 @@ def extract_col_features(img_rgb, mask):
     """
     # Convert color spaces
     hsv = cv.cvtColor(img_rgb, cv.COLOR_RGB2HSV)
-    lab = cv.cvtColor(img_rgb, cv.COLOR_BGR2Lab)
+    lab = cv.cvtColor(img_rgb, cv.COLOR_RGB2Lab)
     ycrcb = cv.cvtColor(img_rgb, cv.COLOR_RGB2YCrCb)
     
     # Color features
