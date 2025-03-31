@@ -136,7 +136,6 @@ def generate_label_dataset(fire_dir, nonfire_dir, mask_dir, gabor_kSize = None,r
     return pd.concat(data, ignore_index=True)
 
 
-
 def prepare_data(df, fire_ratio=1.0):
     """
     pandas dataframe with labels, undersample the nonfire pixel to match ratio
@@ -172,3 +171,5 @@ def compute_class_based_rates(y_true, y_pred):
         "TNR (Specificity)": round(tnr*100, 2),
         "FNR": round(fnr*100, 2)
     }
+
+

@@ -4,7 +4,17 @@ import cv2
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import joblib
 
+
+# Load the saved model
+#loaded_model = joblib.load('tuned_model/best_logistic_model.pkl')
+
+# Use it to predict
+ #img must be resize and preprocessed and specific color and gabor feature extracted.
+#color_top = ['Cb', 'Cr', 'b', 'V'] #color to extract
+#gabor_top = ['gabor_14', 'gabor_6', 'gabor_10', 'gabor_2'] #gabor responses to extract
+#y_pred = loaded_model.predict(img)
 
 # DATASET_DIR = "BoWFireDataset/train"
 DATASET_DIR = "BoWFireDataset/dataset/img/fire"
