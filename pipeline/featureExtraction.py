@@ -50,7 +50,7 @@ def apply_gabor_filters(gray_img, kernels):
     return responses  # List of arrays, shape (H, W) each
 
 
-# function to extract features from image and mask
+# function to extract features from image and mask ( training purposes)
 def extract_col_features(img_rgb, mask):
     """
     assumes RGB image is passed, extract color features  and assign label for each pixel
@@ -80,7 +80,7 @@ def extract_col_features(img_rgb, mask):
 
 
 
-# function to extract gabor features features from image and mask
+# function to extract gabor features features from image and mask ( ntrainin purposes)
 def extract_gabor_features(img_rgb, mask, kernels):
     """
     assumes RGB after bluring
@@ -100,3 +100,54 @@ def extract_gabor_features(img_rgb, mask, kernels):
         flat_features[f'gabor_{i}'] = gabor.flatten()
 
     return pd.DataFrame(flat_features)
+
+
+## for testing
+def extract_top_color_features(image_rgb):
+    """
+    Extracts ['V', 'b', 'Cr', 'Cb'] features from an RGB image. ( these channels gave us the best results from KS test)
+    Parameters:image_rgb (np.ndarray): Input image in RGB format
+    Returns: np.ndarray: Feature array of shape (n_pixels, 4)
+    """
+    # Convert RGB to BGR (because OpenCV expects BGR for color conversions)
+    image_bgr = cv.cvtColor(image_rgb, cv.COLOR_RGB2BGR)
+
+    # Convert to HSV and extract V channel
+    hsv = cv.cvtColor(image_bgr, cv.COLOR_BGR2HSV)
+    V = hsv[:, :, 2].flatten()
+
+    # Convert to Lab and extract b channel
+    lab = cv.cvtColor(image_bgr, cv.COLOR_BGR2Lab)
+    b = lab[:, :, 2].flatten()
+
+    # Convert to YCrCb and extract Cr and Cb channels
+    ycrcb = cv.cvtColor(image_bgr, cv.COLOR_BGR2YCrCb)
+    Cr = ycrcb[:, :, 1].flatten()
+    Cb = ycrcb[:, :, 2].flatten()
+
+    # Stack into (n_pixels, 4) array
+    features = np.column_stack((V, b, Cr, Cb))
+
+    return features
+
+def extract_top_gabor_features(image_rgb, ksize=7, sigma=1):
+    """
+    We analyze and ksize=7 is the best one so default should be okay, not sure if other kernel size would change the performance that much
+    Extract selected Gabor features [14, 6, 10, 2] from an RGB image.
+    Returns an array of shape (n_pixels, 4)
+    """
+    # Step 1: Convert to grayscale
+    gray = cv.cvtColor(image_rgb, cv.COLOR_RGB2GRAY)
+
+    # Step 2: Generate Gabor kernels and apply them
+    kernels = get_gabor_kernels(ksize=ksize, sigma=sigma)
+    responses = apply_gabor_filters(gray, kernels)
+
+    # Step 3: Select specific Gabor responses by index
+    selected_indices = [14, 6, 10, 2]
+    selected_responses = [responses[i].flatten() for i in selected_indices]
+
+    # Step 4: Stack into (H*W, 4) feature matrix
+    gabor_features = np.column_stack(selected_responses)
+    return gabor_features
+
