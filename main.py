@@ -19,17 +19,28 @@ blured_img = apply_bilateral_filter(img=img_resized)
 
 height, width, _ = blured_img.shape # to use later after prediction to convert array of pixels to 2D
 
-#3 Extract pixel color features : selected colors are ['V', 'b', 'Cr', 'Cb']
+#3 
+# 3.1Extract pixel color features : selected colors are ['V', 'b', 'Cr', 'Cb']
+color_feats = extract_top_color_features(blured_img)
+# 3.2 Extract gabor features : selected gabor resonses are ['g2', 'g6', 'g10', 'g14']
+gabor_features= extract_top_gabor_features(blured_img)
+combined_feats = np.hstack((color_feats, gabor_features))  # (n_pixels, 8)
 
+#4 need to scale the input: I should have passed the same scaler I used
+#  for training or now!! I add this later
+scaler = joblib.load("scaler.pkl")
+features_scaled = scaler.transform(combined_feats)
+#5. Load the saved model and predict
+model = joblib.load('tuned_model/best_logistic_model.pkl')
+y_pred = model.predict(features_scaled) #1D array of pixels
 
-# Load the saved model
-#loaded_model = joblib.load('tuned_model/best_logistic_model.pkl')
+#6 reshape from array to 2D
+mask = y_pred.reshape((height, width))
 
-# Use it to predict
- #img must be resize and preprocessed and specific color and gabor feature extracted.
-#color_top = ['Cb', 'Cr', 'b', 'V'] #color to extract
-#gabor_top = ['gabor_14', 'gabor_6', 'gabor_10', 'gabor_2'] #gabor responses to extract
-#y_pred = loaded_model.predict(img)
+plt.imshow(mask, cmap='hot')
+plt.title("Fire Prediction Mask")
+plt.axis('off')
+plt.show()
 
 # DATASET_DIR = "BoWFireDataset/train"
 DATASET_DIR = "BoWFireDataset/dataset/img/fire"
