@@ -134,3 +134,41 @@ def generate_label_dataset(fire_dir, nonfire_dir, mask_dir, gabor_kSize = None,r
         data.append(combined_feature)
 
     return pd.concat(data, ignore_index=True)
+
+
+
+def prepare_data(df, fire_ratio=1.0):
+    """
+    pandas dataframe with labels, undersample the nonfire pixel to match ratio
+    """
+    fire = df[df['label'] == 1]
+    nonfire = df[df['label'] == 0]
+
+    target_n = int(len(fire) * fire_ratio)
+    nonfire = resample(nonfire, replace=False, n_samples=target_n, random_state=42)
+
+    balanced = pd.concat([fire, nonfire]).sample(frac=1, random_state=42).reset_index(drop=True) #shuffle
+
+    X = balanced.drop(columns=['label'])
+    y = balanced['label']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+
+    scaler = StandardScaler() #scale
+    X_train_scaled = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns)
+    X_test_scaled = pd.DataFrame(scaler.transform(X_test), columns=X_test.columns)
+
+    return X_train_scaled, y_train, X_test_scaled, y_test
+
+def compute_class_based_rates(y_true, y_pred):
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    tpr = tp / (tp + fn)
+    fpr = fp / (fp + tn)
+    tnr = tn / (tn + fp)
+    fnr = fn / (fn + tp)
+    return {
+        "TPR (Recall)": round(tpr*100,2),
+        "FPR": round(fpr*100, 2),
+        "TNR (Specificity)": round(tnr*100, 2),
+        "FNR": round(fnr*100, 2)
+    }
