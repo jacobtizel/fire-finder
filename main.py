@@ -1,10 +1,25 @@
-from pipeline.Preprocessing import apply_preprocessing
+from pipeline.Preprocessing import *
+from pipeline.featureExtraction import *
 from pipeline.Colourspaces import *
 import cv2
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 import joblib
+
+
+## the following step to test an image on a pre-tained model
+
+#1. Read 
+image_bgr = cv2.imread("image_path")
+img= cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB) # this step is critical cuz the filters assume input is in RGB not BGR(default)
+#2 resize and bilateral filter (preprocessing step)
+img_resized = resize_image(img=img)
+blured_img = apply_bilateral_filter(img=img_resized)
+
+height, width, _ = blured_img.shape # to use later after prediction to convert array of pixels to 2D
+
+#3 Extract pixel color features : selected colors are ['V', 'b', 'Cr', 'Cb']
 
 
 # Load the saved model
