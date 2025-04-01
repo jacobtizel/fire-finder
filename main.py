@@ -11,15 +11,16 @@ import joblib
 ## the following step to test an image on a pre-tained model
 
 #1. Read 
-image_bgr = cv2.imread("BoWFireDataset/dataset/img/fire/fire007.png")
-img= cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB) # this step is critical cuz the filters assume input is in RGB not BGR(default)
+image= cv2.imread("BoWFireDataset/dataset/img/fire/fire007.png")
 #2 resize and bilateral filter (preprocessing step)
-img_resized = resize_image(img=img)
+img_resized = resize_with_padding(img=image)
 blured_img = apply_bilateral_filter(img=img_resized)
 
 height, width, _ = blured_img.shape # to use later after prediction to convert array of pixels to 2D
 
+
 #3 
+blured_img= cv2.cvtColor(blured_img, cv2.COLOR_BGR2RGB) # this step is critical cuz the filters assume input is in RGB not BGR(default)
 # 3.1Extract pixel color features : selected colors are ['V', 'b', 'Cr', 'Cb']
 color_feats = extract_top_color_features(blured_img)
 # 3.2 Extract gabor features : selected gabor resonses are ['g2', 'g6', 'g10', 'g14']
