@@ -8,6 +8,31 @@ import cv2
 def resize_image(img, size=(256, 256)):
     return cv2.resize(img, size)
 
+
+def resize_with_padding(image, target_size=(224, 224), pad_color=(0, 0, 0)):
+    h, w = image.shape[:2]
+    target_w, target_h = target_size
+
+    # Compute scale factor
+    scale = min(target_w / w, target_h / h)
+    new_w, new_h = int(w * scale), int(h * scale)
+
+    # Resize while keeping aspect ratio
+    resized = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_NEAREST)
+
+    # Compute padding
+    pad_w = target_w - new_w
+    pad_h = target_h - new_h
+    top = pad_h // 2
+    bottom = pad_h - top
+    left = pad_w // 2
+    right = pad_w - left
+
+    # Pad the image to reach target size
+    padded = cv2.copyMakeBorder(resized, top, bottom, left, right,
+                                borderType=cv2.BORDER_CONSTANT, value=pad_color)
+
+    return padded
 ## gaussian or bilateral? very similar bilateral preserve edges
 def apply_gaussian_blur(img, kernel_size=(3, 3), sigma=0.5):
     return cv2.GaussianBlur(img, kernel_size, sigma)
