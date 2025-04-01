@@ -153,7 +153,7 @@ def extract_top_gabor_features(image_rgb, ksize=7, sigma=1):
     responses = apply_gabor_filters(gray, kernels)
 
     # Step 3: Select specific Gabor responses by index
-    selected_indices = [14, 6, 10, 2]
+    selected_indices = [2, 6, 10, 14]
     selected_responses = [responses[i].flatten() for i in selected_indices]
 
     # Step 4: Stack into (H*W, 4) feature matrix
