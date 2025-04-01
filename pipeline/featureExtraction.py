@@ -105,30 +105,39 @@ def extract_gabor_features(img_rgb, mask, kernels):
 ## for testing
 def extract_top_color_features(image_rgb):
     """
-    Extracts ['V', 'b', 'Cr', 'Cb'] features from an RGB image. ( these channels gave us the best results from KS test)
-    Parameters:image_rgb (np.ndarray): Input image in RGB format
-    Returns: np.ndarray: Feature array of shape (n_pixels, 4)
+    Extracts ['Cb', 'R', 'V', 'b', 'Cr'] features from an RGB image.
+    These channels were selected based on KS test performance.
+
+    Parameters:
+        image_rgb (np.ndarray): Input image in RGB format
+
+    Returns:
+        np.ndarray: Feature array of shape (n_pixels, 5)
     """
-    # Convert RGB to BGR (because OpenCV expects BGR for color conversions)
+    # Extract R channel directly from RGB
+    R = image_rgb[:, :, 0].flatten()
+
+    # Convert RGB to BGR for OpenCV color conversions
     image_bgr = cv.cvtColor(image_rgb, cv.COLOR_RGB2BGR)
 
-    # Convert to HSV and extract V channel
+    # HSV -> extract V channel
     hsv = cv.cvtColor(image_bgr, cv.COLOR_BGR2HSV)
     V = hsv[:, :, 2].flatten()
 
-    # Convert to Lab and extract b channel
+    # Lab -> extract b channel
     lab = cv.cvtColor(image_bgr, cv.COLOR_BGR2Lab)
     b = lab[:, :, 2].flatten()
 
-    # Convert to YCrCb and extract Cr and Cb channels
+    # YCrCb -> extract Cr and Cb channels
     ycrcb = cv.cvtColor(image_bgr, cv.COLOR_BGR2YCrCb)
     Cr = ycrcb[:, :, 1].flatten()
     Cb = ycrcb[:, :, 2].flatten()
 
-    # Stack into (n_pixels, 4) array
-    features = np.column_stack((V, b, Cr, Cb))
+    # Stack in the correct order: ['Cb', 'R', 'V', 'b', 'Cr']
+    features = np.column_stack((Cb, R, V, b, Cr))
 
     return features
+
 
 def extract_top_gabor_features(image_rgb, ksize=7, sigma=1):
     """
