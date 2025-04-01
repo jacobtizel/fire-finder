@@ -13,7 +13,7 @@ import joblib
 #1. Read 
 image= cv2.imread("BoWFireDataset/dataset/img/fire/fire007.png")
 #2 resize and bilateral filter (preprocessing step)
-img_resized = resize_with_padding(img=image)
+img_resized = resize_with_padding(image=image)
 blured_img = apply_bilateral_filter(img=img_resized)
 
 height, width, _ = blured_img.shape # to use later after prediction to convert array of pixels to 2D
